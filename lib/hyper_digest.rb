@@ -30,7 +30,25 @@ module HyperDigest
 
     user_state["assetPositions"].each do |pos|
       detail = pos["position"]
-      summary << "\n\t#{detail["coin"]}: #{detail["szi"]}"
+      coin = detail["coin"]
+      szi = detail["szi"]
+      margin_used = detail["marginUsed"].to_f
+      position_value = detail["positionValue"].to_f
+      unrealized_pnl = detail["unrealizedPnl"].to_f
+      leverage_type = detail.dig("leverage", "type")
+      leverage_value = detail.dig("leverage", "value")
+      liquidation_px = detail["liquidationPx"]
+
+      summary << "\n\t#{coin}: #{szi}"
+      summary << "\n\t  Margin Used: #{fmt_usd(margin_used)}"
+      summary << "\n\t  Position Value: #{fmt_usd(position_value)}"
+      summary << "\n\t  Unrealized PnL: #{fmt_usd(unrealized_pnl)}"
+      if leverage_type && leverage_value
+        summary << "\n\t  Leverage: #{leverage_type} #{leverage_value}x"
+      elsif leverage_value
+        summary << "\n\t  Leverage: #{leverage_value}x"
+      end
+      summary << "\n\t  Liquidation Px: #{liquidation_px.nil? ? "N/A" : fmt_usd(liquidation_px.to_f)}"
     end
 
     pp user_state
