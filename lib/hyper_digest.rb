@@ -14,8 +14,8 @@ module HyperDigest
     sdk = Hyperliquid.new
 
     user_state = sdk.info.user_state(wallet_address)
-    account_value = user_state["marginSummary"]["accountValue"].to_f.round(2)
-    total_margin_used = user_state["marginSummary"]["totalMarginUsed"].to_f.round(2)
+    account_value = user_state.dig("marginSummary", "accountValue").to_f.round(2)
+    total_margin_used = user_state.dig("marginSummary", "totalMarginUsed").to_f.round(2)
     withdrawable = user_state["withdrawable"].to_f.round(2)
 
     summary = <<~TEXT
@@ -51,13 +51,7 @@ module HyperDigest
       summary << "\n\t  Liquidation Px: #{liquidation_px.nil? ? "N/A" : fmt_usd(liquidation_px.to_f)}"
     end
 
-    pp user_state
-    puts
-    puts
-    puts
-
-    puts summary
-
+    # don't send email for now
     exit(0)
 
     smtp_options = {
@@ -76,7 +70,7 @@ module HyperDigest
       to recipient_email
       from smtp_username
       subject "test"
-      text_part { body "test" }
+      text_part { body summary }
     end
 
     puts "Successfully sent HyperDigest to #{recipient_email}"
